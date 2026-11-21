@@ -1,0 +1,11 @@
+.bandeau {
+    margin-top: 6px;
+    margin-bottom: 6px;
+}
+
+.affichage-frequence { font-feature-settings: "tnum";}
+
+.vumetre {
+    margin-left: 24px;
+    margin-right: 24px;
+}
