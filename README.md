@@ -16,26 +16,27 @@ Petite interface graphique pour l'écoute avec la clé RTL-SDR (RTL2832U) sur Li
 ### Fedora
 
 ```bash
-sudo dnf install python3 python3-gobject gtk4 libadwaita python3-numpy rtl-sdr pulseaudio-utils
+sudo dnf install python3 python3-gobject gtk4 libadwaita python3-numpy rtl-sdr pulseaudio-utils blueprint-compiler
 ```
 
 ### Debian / Ubuntu
 
 ```bash
-sudo apt install python3 python3-gi gir1.2-gtk-4.0 gir1.2-adw-1 python3-numpy rtl-sdr pulseaudio-utils
+sudo apt install python3 python3-gi gir1.2-gtk-4.0 gir1.2-adw-1 python3-numpy rtl-sdr pulseaudio-utils blueprint-compiler
 ```
 
 ## Dépendances
 
-| Rôle                     | Fedora             | Debian / Ubuntu                  |
-|--------------------------|--------------------|----------------------------------|
-| Python 3                 | `python3`          | `python3`                        |
-| Bindings GObject (`gi`)  | `python3-gobject`  | `python3-gi`                     |
-| GTK 4                    | `gtk4`             | `gir1.2-gtk-4.0`                 |
-| libadwaita (≥ 1.4)       | `libadwaita`       | `gir1.2-adw-1`                   |
-| numpy                    | `python3-numpy`    | `python3-numpy`                  |
-| `rtl_fm`                 | `rtl-sdr`          | `rtl-sdr`                        |
-| `pacat`                  | `pulseaudio-utils` | `pulseaudio-utils`               |
+| Rôle                    | Fedora               | Debian / Ubuntu      |
+|-------------------------|----------------------|----------------------|
+| Python 3                | `python3`            | `python3`            |
+| Bindings GObject (`gi`) | `python3-gobject`    | `python3-gi`         |
+| GTK 4                   | `gtk4`               | `gir1.2-gtk-4.0`     |
+| libadwaita (≥ 1.4)      | `libadwaita`         | `gir1.2-adw-1`       |
+| numpy                   | `python3-numpy`      | `python3-numpy`      |
+| `rtl_fm`                | `rtl-sdr`            | `rtl-sdr`            |
+| `pacat`                 | `pulseaudio-utils`   | `pulseaudio-utils`   |
+| `blueprint-compiler`    | `blueprint-compiler` | `blueprint-compiler` |
 
 L'application utilise `Adw.ToolbarView`, `Adw.SpinRow` et `Adw.SwitchRow`, qui demandent **libadwaita 1.4 ou plus**.
 Il faut donc au minimum **Ubuntu 24.04** ou **Debian 13 (Trixie)**. Debian 12 et Ubuntu 22.04 ont une version trop ancienne.
