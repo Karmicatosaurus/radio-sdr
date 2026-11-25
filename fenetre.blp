@@ -1,0 +1,199 @@
+using Gtk 4.0;
+using Adw 1;
+
+Adjustment reglage_frequence {
+  lower: 24;
+  upper: 1766;
+  step-increment: 0.1;
+  page-increment: 1;
+}
+
+Adjustment reglage_gain {
+  lower: 0;
+  upper: 49.6;
+  step-increment: 0.5;
+  page-increment: 5;
+}
+
+Adjustment reglage_squelch {
+  lower: 0;
+  upper: 1000;
+  step-increment: 10;
+  page-increment: 100;
+}
+
+Adjustment reglage_ppm {
+  lower: -200;
+  upper: 200;
+  step-increment: 1;
+  page-increment: 10;
+}
+
+Adjustment reglage_volume {
+  lower: 0;
+  upper: 2;
+  step-increment: 0.05;
+  page-increment: 0.5;
+}
+
+template $FenetreRadio: Adw.ApplicationWindow {
+  title: "Radio SDR";
+  default-width: 460;
+  default-height: 760;
+  close-request => $_sur_fermeture();
+
+  content: Adw.ToastOverlay notifications {
+    child: Adw.ToolbarView {
+      [top]
+      Adw.HeaderBar {
+        title-widget: Adw.ViewSwitcher {
+          stack: onglets;
+          policy: wide;
+        };
+      }
+
+      content: Adw.ViewStack onglets {
+        Adw.ViewStackPage {
+          name: "radio";
+          title: "Radio";
+          icon-name: "audio-speakers-symbolic";
+
+          child: Adw.PreferencesPage {
+            Adw.PreferencesGroup {
+              Box {
+                orientation: vertical;
+                spacing: 12;
+
+                styles [
+                  "bandeau",
+                ]
+
+                Label etiquette_freq {
+                  styles [
+                    "title-1",
+                    "affichage-frequence",
+                  ]
+                }
+
+                Label etiquette_etat {
+                  styles [
+                    "dim-label",
+                  ]
+                }
+
+                LevelBar vumetre {
+                  min-value: 0;
+                  max-value: 1;
+
+                  styles [
+                    "vumetre",
+                  ]
+                }
+
+                Button bouton_lecture {
+                  halign: center;
+                  clicked => $_sur_clic_lecture();
+
+                  styles [
+                    "pill",
+                  ]
+
+                  child: Adw.ButtonContent contenu_lecture {};
+                }
+              }
+            }
+
+            Adw.PreferencesGroup {
+              title: "Réception";
+
+              Adw.SpinRow ligne_freq {
+                title: "Fréquence";
+                subtitle: "Mhz";
+                digits: 4;
+                numeric: true;
+                adjustment: reglage_frequence;
+                notify::value => $_sur_frequence_modifie();
+              }
+
+              Adw.ComboRow ligne_mode {
+                title: "Modulation";
+                notify::selected => $_sur_reglage_modifie();
+              }
+
+              Adw.SwitchRow ligne_gain_auto {
+                title: "Gain automatique";
+                notify::active => $_sur_reglage_modifie();
+              }
+
+              Adw.SpinRow ligne_gain {
+                title: "Gain";
+                subtitle: "dB";
+                digits: 1;
+                adjustment: reglage_gain;
+                sensitive: bind ligne_gain_auto.active inverted;
+                notify::value => $_sur_reglage_modifie();
+              }
+
+              Adw.SpinRow ligne_squelch {
+                title: "Squelch";
+                subtitle: "0 = désactivé (non utilisé en FM large)";
+                numeric: true;
+                adjustment: reglage_squelch;
+                notify::value => $_sur_reglage_modifie();
+              }
+
+              Adw.SpinRow ligne_ppm {
+                title: "Correction PPM";
+                subtitle: "Décalage de l'oscillateur";
+                numeric: true;
+                adjustment: reglage_ppm;
+                notify::value => $_sur_reglage_modifie();
+              }
+            }
+
+            Adw.PreferencesGroup {
+              title: "Audio";
+
+              Adw.ActionRow {
+                title: "Volume";
+
+                [suffix]
+                Scale curseur_volume {
+                  orientation: horizontal;
+                  hexpand: true;
+                  valign: center;
+                  digits: 2;
+                  adjustment: reglage_volume;
+                  value-changed => $_sur_volume();
+                }
+              }
+            }
+          };
+        }
+
+        Adw.ViewStackPage {
+          name: "favoris";
+          title: "Favoris";
+          icon-name: "starred-symbolic";
+
+          child: Adw.PreferencesPage {
+            Adw.PreferencesGroup groupe_favoris {
+              title: "Favoris";
+
+              header-suffix: Button {
+                icon-name: "list-add-symbolic";
+                tooltip-text: "Ajouter la fréquence actuelle";
+                valign: center;
+                clicked => $_sur_ajout_favori();
+
+                styles [
+                  "flat",
+                ]
+              };
+            }
+          };
+        }
+      };
+    };
+  };
+}

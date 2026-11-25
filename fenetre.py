@@ -1,5 +1,7 @@
 """Comportement de la fenêtre GTK4 / libadwaita de Radio SDR."""
 
+import shutil
+import subprocess
 from collections.abc import Callable
 from pathlib import Path
 from typing import Final, NamedTuple, TypeVarTuple
@@ -17,7 +19,7 @@ from recepteur import (
 
 DOSSIER: Final[Path] = Path(__file__).resolve().parent
 FICHIER_CSS: Final[Path] = DOSSIER / "style.css"
-FICHIER_UI: Final[Path] = DOSSIER / "fenetre.ui"
+FICHIER_BLP: Final[Path] = DOSSIER / "fenetre.blp"
 DELAI_RELANCE_MS: Final[int] = 400
 
 ONGLET_RADIO: Final[str] = "radio"
@@ -74,11 +76,40 @@ def bouton_icone(
     return bouton
 
 
-@Gtk.Template(filename=str(FICHIER_UI))
+def compiler_blueprint(fichier: Path) -> str:
+    """Compile un fichier Blueprint (.blp) en XML GtkBuilder."""
+    compilateur: str | None = shutil.which("blueprint-compiler")
+    if compilateur is None:
+        raise RuntimeError(
+            "blueprint-compiler est introuvable : installez le paquet "
+            "« blueprint-compiler » pour charger l'interface."
+        )
+
+    """resultat = subprocess.run(
+        [compilateur, "compile", str(fichier)],
+        capture_output=True,
+        text=True,
+    )"""
+
+    resultat = subprocess.run(
+        [compilateur, "compile", str(fichier)],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if resultat.returncode != 0:
+        raise RuntimeError(
+            f"Échec de la compilation de {fichier.name} :\n"
+            f"{resultat.stderr or resultat.stdout}"
+        )
+    return resultat.stdout
+
+
+@Gtk.Template(string=compiler_blueprint(FICHIER_BLP))
 class FenetreRadio(Adw.ApplicationWindow):
     __gtype_name__ = "FenetreRadio"
 
-    # Widget décrits dans fenetre.ui (attribut = id XML)
+    # Widgets décrits dans fenetre.blp (attribut = id Blueprint)
     notifications: Adw.ToastOverlay = Gtk.Template.Child()
     onglets: Adw.ViewStack = Gtk.Template.Child()
     etiquette_freq: Gtk.Label = Gtk.Template.Child()
@@ -196,7 +227,7 @@ class FenetreRadio(Adw.ApplicationWindow):
         enregistrer_config(self.config)
         self._reconstruire_favoris()
 
-    # Rappels déclarés dans fenetre.ui
+    # Rappels déclarés dans fenetre.blp
     @Gtk.Template.Callback()
     def _sur_clic_lecture(self, _bouton: Gtk.Button) -> None:
         if self.en_ecoute:
@@ -235,9 +266,7 @@ class FenetreRadio(Adw.ApplicationWindow):
             return
         # Regroupe les changements rapides (molette, flèches) en une seule relance
         self._annuler_relance()
-        self._id_relance = GLib.timeout_add(
-            DELAI_RELANCE_MS, self._relance_differee
-        )
+        self._id_relance = GLib.timeout_add(DELAI_RELANCE_MS, self._relance_differee)
 
     @Gtk.Template.Callback()
     def _sur_fermeture(self, *args: object) -> bool:
